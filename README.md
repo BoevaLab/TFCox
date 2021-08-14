@@ -21,7 +21,9 @@ pandas
 
 find rest of list
 
-Note: This model requires Tensorflow eager to be turned off, the code will do this automatically, so if you need TF eager you will need to turn it back on yourself.
+Note: This model requires TensorFlow eager to be turned off, the code will do this automatically, so if you need TF eager you will need to turn it back on yourself.
+Note: Due to how the Cox model operates this does not train using batches, therefore large models are not recommended due to high memory requirements.
+
 
 ## Usage
 
@@ -59,7 +61,7 @@ This is the predict method, it takes an array of data and return the predicted h
 
 ### Variables
 
-
-
+- .beta_  gives the weight array of the model
+- .model_history_  gives the training loss and concordance after each training epoch.
 
 
