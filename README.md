@@ -8,20 +8,23 @@ TFCox is designed with the sklearn style in mind and so should be straightforwar
 
 ## Cox Proportional Hazards Model
 
-BRIEFLY DESCRIBE COX HERE!
+The Cox Proportional Hazards model is designed to evaluate the relative likelihood of the occurance of an event. It works on censored data where the event has occured for some samples but not others.
+
+A detailed explanation of Proportional Hazards Models, including Cox, is available here:
+
+https://en.wikipedia.org/wiki/Proportional_hazards_model
 
 ## Installation
 The TFCox model file 'TFCox.py' contains the entire model class. There is no installation, merely download and include the file and import it directly. Or alternatively copy the class into your own code. It should work on Windows, Max and Linux provided the underlying packages have been installed.
 
 The packages required to use the model are as follows:
 
-Tensorflow v2.3+
-numpy
-pandas
-
-find rest of list
+Tensorflow 2 (v2.3 onwards should work)
+numpy (v1.20 onwards should work)
+pandas (v1.2 onwards should work)
 
 Note: This model requires TensorFlow eager to be turned off, the code will do this automatically, so if you need TF eager you will need to turn it back on yourself.
+Note: The model was designed with tensorflow operating in gpu mode but should work in cpu only mode.
 Note: Due to how the Cox model operates this does not train using batches, therefore large models are not recommended due to high memory requirements.
 
 
@@ -65,3 +68,6 @@ This is the predict method, it takes an array of data and return the predicted h
 - .model_history_  gives the training loss and concordance after each training epoch.
 
 
+## Example usage
+
+Both a basic example and the code to run a nested shuffle split on TCGA data are included.
