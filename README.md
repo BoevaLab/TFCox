@@ -59,9 +59,9 @@ class TFCox(seed=42,batch_norm=False,l1_ratio=1,lbda=0.0001,
 This is the fit method, it takes the X data and the state and time and computes the CoxPH model.
 
 
-**predict(X)
+**predict(X)**
 
-**Parameters
+**Parameters**
 - **X**  (array like, shape = (n_samples,n_features)) - Data Matrix
 
 This is the predict method, it takes an array of data and returns the predicted hazard scores.
