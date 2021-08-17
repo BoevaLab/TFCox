@@ -31,17 +31,21 @@ Note: Due to how the Cox model operates this does not train using batches, there
 ## Usage
 
 class TFCox(seed=42,batch_norm=False,l1_ratio=1,lbda=0.0001,
-                 max_it=50,learn_rate=0.01,stop_if_nan=True,stop_at_value=False)
+                 max_it=50,learn_rate=0.001,stop_if_nan=True,stop_at_value=False, 
+                 cscore_metric=False,suppress_warnings=True,verbose=0)
 
 
 ### Parameters
 
 - seed (int, default:42) : sets the random seed for the weight intialization.
-- batch_norm (bool, default:Falso) : If True features will be normalized during training.
+- batch_norm (bool, default:False) : If True features will be normalized during training.
 - l1_ratio (float range(0-1), default:1) : Controls the proportion of L1 and L2 regularization. l1_ratio = 1 is equivalent to LASSO and l1_ratio=0 is equivalent to Ridge.
 - lbda (float, default=0.0001) : The regularization constant, this can be set to 0, if so one of the stop flags should probably be turned on.
 - stop_if_nan (bool, default=True) : This stops the model if nan or infinite weights are reached and then returns the non nan weights from the previous epoch.
-- stop_at_values(False or float range(0-1), defaults=False) : This stops the model as soon as a target training concordance is reached.
+- stop_at_value(False or float range(0-1), defaults=False) : This stops the model as soon as a target training concordance is reached. Note: Dramatically slows the model on larger datasets due to calculating concordance at each training epoch.
+- cscore_metric (bool, default: False) : Calculates the concordance at each training epoch and saves it in loss_history_. Note: Dramatically slows the model on larger datasets due to calculating concordance at each training epoch.
+- suppress_warnings (bool, default: True) : Suppresses tensorflow deprecation warnings. This is useful to avoid the dsiplay of large numbers of deprectaion warnings related to diabling eager mode. However, it is important to note that this will disable other potentially important warnings, so if anthing isn't working this should be disabled.
+- verbose (0-1, default=0) : If verbose = 1 then loss at each epoch and the model summary will be printed during fit. Otherwise no information will be printed.
 
 ### Methods
 
@@ -60,14 +64,14 @@ This is the fit method, it takes the X data and the state and time and computes 
 **Parameters
 - **X**  (array like, shape = (n_samples,n_features)) - Data Matrix
 
-This is the predict method, it takes an array of data and return the predicted hazard scores.
+This is the predict method, it takes an array of data and returns the predicted hazard scores.
 
 ### Variables
 
 - .beta_  gives the weight array of the model
-- .model_history_  gives the training loss and concordance after each training epoch.
+- .loss_history_  gives the training loss and concordance after each training epoch.
 
 
 ## Example usage
 
-Both a basic example and the code to run a nested shuffle split on TCGA data are included.
+Both an example on simulated data and the code to run a nested shuffle split on TCGA data are included.
