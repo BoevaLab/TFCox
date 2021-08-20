@@ -1,17 +1,3 @@
-import numpy as np
-import pandas as pd
-import tensorflow as tf
-import tensorflow.keras.backend as K
-from tensorflow.keras.layers import Input, Dense, Dropout, BatchNormalization, concatenate, Lambda, Multiply
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam, RMSprop,SGD,Nadam, Adagrad, Adadelta
-from tensorflow.keras.regularizers import l1,l2,l1_l2
-from tensorflow.keras.initializers import Constant ,Orthogonal, RandomNormal, VarianceScaling, Ones, Zeros
-from tensorflow.keras.constraints import Constraint, UnitNorm
-from keras.callbacks import Callback, TerminateOnNaN, ModelCheckpoint
-import math
-
-
 class TFCox():
     def __init__(self, seed=42,batch_norm=False,l1_ratio=1,lbda=0.0001,
                  max_it=50,learn_rate=0.001,stop_if_nan=True,stop_at_value=False, cscore_metric=False,suppress_warnings=True,verbose=0):
@@ -40,20 +26,18 @@ class TFCox():
 
         return loss
 
-    def cscore(self, state):
+    def cscore_metric(self, state):
         def loss(y_true,y_pred):
             con = 0
             dis = 0
             for a in range(len(y_pred)):
-                for b in range(a+1,len(y_pred)):                   
-                    
-                        
-                        if (y_pred[a]>y_pred[b])  & (y_pred[a]*state[a]>0):
+                for b in range(a+1,len(y_pred)):                                       
+                        if (y_pred[a]>y_pred[b])  & (y_pred[a]*state[a]!=0):
                             con+=1
-                        
-                        elif (y_pred[a]<y_pred[b])  & (y_pred[a]*state[a]>0):
+                            
+                        elif (y_pred[a]<y_pred[b])  & (y_pred[a]*state[a]!=0):
                             dis+=1
-            return     (con/(con+dis))
+            return     con/(con+dis)
         return loss
  
     
@@ -69,12 +53,9 @@ class TFCox():
         self.X = (pd.DataFrame(np.array(X)).reindex(self.newindex))                      
         self.state = np.array(pd.DataFrame(np.array(state)).reindex(self.newindex))
         self.time  = np.array(pd.DataFrame(np.array(time)).reindex(self.newindex))                       
-        inputsx = Input(shape=(self.X.shape[1],))
-        
-
-        
-        
+        inputsx = Input(shape=(self.X.shape[1],)) 
         state = Input(shape=(1,))
+        
         if self.bnorm==True:
             out = BatchNormalization()(inputsx)
             out = Dense(1,activation='linear',
@@ -89,7 +70,7 @@ class TFCox():
         model = Model(inputs=[inputsx, state], outputs=out)
         if (self.tcscore != False) or (self.cscore==True) :
             model.compile(optimizer=Adam(self.lr) ,
-                          loss=self.coxloss(state) , metrics=[self.cscore(state)],
+                          loss=self.coxloss(state) , metrics=[self.cscore_metric(state)],
                           experimental_run_tf_function=False)
         else:
             model.compile(optimizer=Adam(self.lr) ,
