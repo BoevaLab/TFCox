@@ -15,7 +15,7 @@ A detailed explanation of Proportional Hazards Models, including Cox, is availab
 https://en.wikipedia.org/wiki/Proportional_hazards_model
 
 ## Installation
-The TFCox model file 'TFCox.py' contains the entire model class. There is no installation, merely download and include the file and import it directly. Or alternatively copy the class into your own code. It should work on Windows, Max and Linux provided the underlying packages have been installed.
+The TFCox model file 'TFCox.py' contains the entire model class. There is no installation, merely download and include the file and import it directly. Or alternatively copy the class into your own code. It should work on Windows, Mac and Linux provided the underlying packages have been installed.
 
 The packages required to use the model are as follows:
 
