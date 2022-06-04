@@ -1,6 +1,6 @@
 class TFCox():
-    def __init__(self, seed=42,batch_norm=False,l1_ratio=1,lbda=0.0001,
-                 max_it=50,learn_rate=0.001,stop_if_nan=True,stop_at_value=False, cscore_metric=False,suppress_warnings=True,verbose=0):
+    def __init__(self, seed=42,norm=False,optimizer='Ftrl',l1_ratio=1,lbda=0.0001,
+                 max_it=50,learn_rate=0.001,momentum=0.1,stop_if_nan=True,stop_at_value=False, cscore_metric=False,suppress_warnings=True,verbose=0):
         
         self.max_it = max_it
         self.tnan = stop_if_nan
@@ -9,19 +9,29 @@ class TFCox():
         self.cscore=cscore_metric
         np.random.seed(seed)
         tf.random.set_seed(seed)
-        
+        self.op = optimizer
         self.l1r = l1_ratio
         self.lbda=lbda
-        self.bnorm = batch_norm
+        self.norm = norm
         self.verbose=verbose
         if suppress_warnings == True:
             import warnings
             warnings.filterwarnings('ignore')
        
-    def coxloss(self, state):
-        
+        if optimizer == 'Adam':
+            self.opt = Adam(learn_rate)
+        if optimizer == 'SGD':
+            self.opt = SGD(learn_rate)
+        if optimizer == 'SGDmomentum':
+            self.opt = SGD(learn_rate,momentum=momentum)
+        if optimizer == 'RMSprop':
+            self.opt = RMSprop(learn_rate)
+        if optimizer == 'Ftrl':
+            self.opt = Ftrl(learn_rate,l1_regularization_strength=l1_ratio*lbda*100, l2_regularization_strength=(1-l1_ratio)*lbda*100)
+            #self.opt = Ftrl(learn_rate,l1_regularization_strength=1, l2_regularization_strength=0)
+            
+    def coxloss(self, state):        
         def loss(y_true, y_pred):  
-
                 return -K.mean((y_pred - K.log(tf.math.cumsum(K.exp(y_pred),reverse=True,axis=0)+0.0001))*state,axis=0)
 
         return loss
@@ -56,24 +66,38 @@ class TFCox():
         inputsx = Input(shape=(self.X.shape[1],)) 
         state = Input(shape=(1,))
         
-        if self.bnorm==True:
+#         if self.op == 'Ftrl':
+#             if self.norm==True:
+#                 out = BatchNormalization()(inputsx)
+#                 out = Dense(1,activation='linear', use_bias=False)(out)
+#             else:
+#                 out = Dense(1,activation='linear', use_bias=False)(inputsx)
+                
+#         else:
+        if self.norm==True:
             out = BatchNormalization()(inputsx)
-            out = Dense(1,activation='linear',
+            if self.op!='Ftrl':
+                out = Dense(1,activation='linear',kernel_initializer=Zeros(),
                     kernel_regularizer=l1_l2(self.lbda*self.l1r,self.lbda*(1-self.l1r)),
                    use_bias=False)(out)
+            else:
+                out = Dense(1,activation='linear',kernel_initializer=Zeros(),
+                   use_bias=False)(out)
         else:
-            out = Dense(1,activation='linear',
+            if self.op!='Ftrl':
+                out = Dense(1,activation='linear',kernel_initializer=Zeros(),
                     kernel_regularizer=l1_l2(self.lbda*self.l1r,self.lbda*(1-self.l1r)),
                    use_bias=False)(inputsx)
-
-        
+            else:
+                out = Dense(1,activation='linear',kernel_initializer=Zeros(),
+                   use_bias=False)(inputsx)
         model = Model(inputs=[inputsx, state], outputs=out)
         if (self.tcscore != False) or (self.cscore==True) :
-            model.compile(optimizer=Adam(self.lr) ,
+            model.compile(optimizer=self.opt ,
                           loss=self.coxloss(state) , metrics=[self.cscore_metric(state)],
                           experimental_run_tf_function=False)
         else:
-            model.compile(optimizer=Adam(self.lr) ,
+            model.compile(optimizer=self.opt ,
                           loss=self.coxloss(state) ,
                           experimental_run_tf_function=False)
         
