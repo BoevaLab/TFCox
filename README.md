@@ -77,4 +77,5 @@ This is the predict method, it takes an array of data and returns the predicted 
 
 ## Example usage
 
-Both an example on simulated data and the code to run a nested shuffle split on TCGA data are included.
+Both an example on simulated data and the code to run a nested shuffle split on TCGA data are included. 
+The required datasets can be found here: https://cloud.inf.ethz.ch/s/ssmgyQ8Y6fLz44A
